@@ -10,12 +10,18 @@ let s:source = {
       \ }
 
 
-"
+" main of this source
 function! s:source.gather_candidates(args, context)
   let candidates = []
 
-  let dbs = ["aaa","bbb"]
+  " get dbs as string by vimproc,mongo shell
+  let dbs_line = vimproc#system("mongo --quiet --eval 'db.getMongo().getDBNames()'")
+  " last char is ^@, so remove last and split by ','
+  let dbs = split(dbs_line[0 : strlen(dbs_line) - 2], ",")
+
+  "call append(line('$'), dbs)
   
+  " set to unite candidates
   for db in dbs
     call add(candidates, {
           \ "word": db,
@@ -24,7 +30,6 @@ function! s:source.gather_candidates(args, context)
           \ })
     unlet db
   endfor
-
 
   return candidates
 endfunction
