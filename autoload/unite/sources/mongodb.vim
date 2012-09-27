@@ -15,7 +15,7 @@ let s:col_source = {
       \ }
 
 " main process of mongodb_db
-function! s:db_source.gather_candidates(args, context)
+function! s:db_source.gather_candidates(args, context) {{{
   let candidates = []
 
   " get dbs as string by vimproc,mongo shell
@@ -36,10 +36,10 @@ function! s:db_source.gather_candidates(args, context)
   endfor
 
   return candidates
-endfunction
+endfunction }}}
 
 " main process of mongodb_col
-function! s:col_source.gather_candidates(args, context)
+function! s:col_source.gather_candidates(args, context) {{{
   let candidates = []
 
   call append(line('$'), a:args[0])
@@ -63,7 +63,7 @@ function! s:col_source.gather_candidates(args, context)
   endfor
 
   return candidates
-endfunction
+endfunction }}}
 
 
 
@@ -76,3 +76,6 @@ endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+
+" vim: foldmethod=marker
