@@ -4,14 +4,18 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " source object
-let s:source = {
-      \ 'name' : 'mongodb',
+let s:db_source = {
+      \ 'name' : 'mongodb_db',
       \ 'description' : 'candidates from MongoDB',
       \ }
 
+let s:col_source = {
+      \ 'name' : 'mongodb_col',
+      \ 'description' : 'candidates from MongoDB',
+      \ }
 
-" main of this source
-function! s:source.gather_candidates(args, context)
+" main process of mongodb_db
+function! s:db_source.gather_candidates(args, context)
   let candidates = []
 
   " get dbs as string by vimproc,mongo shell
@@ -26,7 +30,7 @@ function! s:source.gather_candidates(args, context)
     call add(candidates, {
           \ "word": db,
           \ "kind": "source",
-          \ "action__source_name" : "mongodb",
+          \ "action__source_name" : ["mongodb_col", db],
           \ })
     unlet db
   endfor
@@ -34,10 +38,38 @@ function! s:source.gather_candidates(args, context)
   return candidates
 endfunction
 
+" main process of mongodb_col
+function! s:col_source.gather_candidates(args, context)
+  let candidates = []
+
+  call append(line('$'), a:args[0])
+  
+
+  " get cols as string by vimproc,mongo shell
+  let cols_line = vimproc#system("mongo ". a:args[0] ." --quiet --eval 'db.getCollectionNames()'")
+  " last char is ^@, so remove last and split by ','
+  let cols = split(cols_line[0 : strlen(cols_line) - 2], ",")
+
+  "call append(line('$'), dbs)
+  
+  " set to unite candidates
+  for col in cols
+    call add(candidates, {
+          \ "word": col,
+          \ "kind": "source",
+          \ "action__source_name" : "mongodb_db",
+          \ })
+    unlet col
+  endfor
+
+  return candidates
+endfunction
+
+
 
 " define unite source
 function! unite#sources#mongodb#define()
-  return s:source
+  return [s:db_source, s:col_source]
 endfunction
 
 
