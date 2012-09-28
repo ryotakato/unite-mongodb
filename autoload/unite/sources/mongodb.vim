@@ -25,8 +25,6 @@ function! s:db_source.gather_candidates(args, context) "{{{
   " last char is ^@, so remove last and split by ','
   let dbs = split(dbs_line[0 : strlen(dbs_line) - 2], ",")
 
-  "call append(line('$'), dbs)
-  
   " set to unite candidates
   for db in dbs
     call add(candidates, {
@@ -44,19 +42,19 @@ endfunction "}}}
 function! s:col_source.gather_candidates(args, context) "{{{
   let candidates = []
 
+  let db_name = a:args[0]
+
   " print breadcrumb
-  call unite#print_source_message("MongoDB > ".a:args[0]." > ", s:db_source.name)
+  call unite#print_source_message("MongoDB > ".db_name." > ", s:db_source.name)
 
   " get cols as string by vimproc,mongo shell
   let cols_line = vimproc#system(
               \ "mongo ".
-              \ a:args[0] .
+              \ db_name.
               \ " --quiet --eval 'db.getCollectionNames()'")
   " last char is ^@, so remove last and split by ','
   let cols = split(cols_line[0 : strlen(cols_line) - 2], ",")
 
-  "call append(line('$'), dbs)
-  
   " set to unite candidates
   for col in cols
     call add(candidates, {
