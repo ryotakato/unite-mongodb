@@ -2,6 +2,10 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+" define unite source
+function! unite#sources#mongodb#define()
+  return [s:db_source, s:col_source, s:doc_source]
+endfunction
 
 " source object
 let s:db_source = {
@@ -108,16 +112,8 @@ endfunction "}}}
 
 
 
-" define unite source
-function! unite#sources#mongodb#define()
-  return [s:db_source, s:col_source, s:doc_source]
-endfunction
-
-
-
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
-
 
 " vim: foldmethod=marker
