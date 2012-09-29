@@ -92,7 +92,7 @@ function! s:doc_source.gather_candidates(args, context) "{{{
               \ .".find().forEach(printjson)'")
 
   " split by '\n'(=='^@') or ',' 
-  let docs = split(docs_line, '[\n,]')
+  let docs = split(docs_line, '[\n]')
 
   " set to unite candidates
   for doc in docs
