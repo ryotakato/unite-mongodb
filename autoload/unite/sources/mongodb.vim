@@ -93,7 +93,7 @@ function! s:doc_source.gather_candidates(args, context) "{{{
               \ .db_name
               \ ." --quiet --eval 'db."
               \ .col_name
-              \ .".find().forEach(printjson)'")
+              \ .".find().forEach(printjsononeline)'")
 
   " split by '\n'(=='^@') or ',' 
   let docs = split(docs_line, '[\n]')
