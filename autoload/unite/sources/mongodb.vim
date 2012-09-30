@@ -5,31 +5,36 @@ set cpo&vim
 " define unite source
 function! unite#sources#mongodb#define()
   return executable('mongo') && unite#util#has_vimproc() 
-              \ ? [s:db_source, s:col_source, s:doc_source]
+              \ ? [s:source]
               \ : []
 endfunction
 
 " source object
-let s:db_source = {
+let s:source = {
       \ 'name' : 'mongodb',
       \ 'description' : 'candidates from MongoDB',
       \ }
 
-let s:col_source = {
-      \ 'name' : 'mongodb_col',
-      \ 'description' : 'candidates from MongoDB Collection',
-      \ }
-
-let s:doc_source = {
-      \ 'name' : 'mongodb_doc',
-      \ 'description' : 'candidates from MongoDB Document',
-      \ }
-
 " main process of mongodb
-function! s:db_source.gather_candidates(args, context) "{{{
+function! s:source.gather_candidates(args, context) "{{{
+  let a_count = len(a:args)
+
+  if (a_count == 0) 
+    return s:db_list()
+  elseif (a_count == 1)
+    return s:col_list(a:args[0])
+  else
+    return s:doc_list(a:args[0], a:args[1])
+  end
+
+endfunction "}}}
+
+
+" return db list
+function! s:db_list() "{{{
   let candidates = []
   
-  call unite#print_source_message('MongoDB > ', s:db_source.name)
+  call unite#print_source_message('MongoDB > ', s:source.name)
 
   " get dbs as string by vimproc,mongo shell
   let dbs_line = vimproc#system("mongo --quiet --eval 'db.getMongo().getDBNames()'")
@@ -41,27 +46,26 @@ function! s:db_source.gather_candidates(args, context) "{{{
     call add(candidates, {
           \ "word": db,
           \ "kind": "source",
-          \ "action__source_name" : ["mongodb_col", db],
+          \ "action__source_name" : ["mongodb", db],
           \ })
     unlet db
   endfor
 
   return candidates
+
 endfunction "}}}
 
-" main process of mongodb_col
-function! s:col_source.gather_candidates(args, context) "{{{
+" return col list
+function! s:col_list(db_name) "{{{
   let candidates = []
 
-  let db_name = a:args[0]
-
   " print breadcrumb
-  call unite#print_source_message("MongoDB > ".db_name." > ", s:db_source.name)
+  call unite#print_source_message("MongoDB > ".a:db_name." > ", s:source.name)
 
   " get cols as string by vimproc,mongo shell
   let cols_line = vimproc#system(
               \ "mongo "
-              \ .db_name
+              \ .a:db_name
               \ ." --quiet --eval 'db.getCollectionNames()'")
   " split by '\n'(=='^@') or ',' 
   let cols = split(cols_line, '[\n,]')
@@ -71,30 +75,28 @@ function! s:col_source.gather_candidates(args, context) "{{{
     call add(candidates, {
           \ "word": col,
           \ "kind": "source",
-          \ "action__source_name" : ["mongodb_doc", db_name, col],
+          \ "action__source_name" : ["mongodb", a:db_name, col],
           \ })
     unlet col
   endfor
 
   return candidates
+
 endfunction "}}}
 
-" main process of mongodb_doc
-function! s:doc_source.gather_candidates(args, context) "{{{
+" return doc list
+function! s:doc_list(db_name, col_name) "{{{
   let candidates = []
-
-  let db_name = a:args[0]
-  let col_name = a:args[1]
-
+  
   " print breadcrumb
-  call unite#print_source_message("MongoDB > ".db_name." > ".col_name, s:db_source.name)
+  call unite#print_source_message("MongoDB > ".a:db_name." > ".a:col_name, s:source.name)
 
   " get cols as string by vimproc,mongo shell
   let docs_line = vimproc#system(
               \ "mongo "
-              \ .db_name
+              \ .a:db_name
               \ ." --quiet --eval 'db."
-              \ .col_name
+              \ .a:col_name
               \ .".find().forEach(printjsononeline)'")
 
   " split by '\n'(=='^@') or ',' 
@@ -110,6 +112,7 @@ function! s:doc_source.gather_candidates(args, context) "{{{
   endfor
 
   return candidates
+
 endfunction "}}}
 
 
