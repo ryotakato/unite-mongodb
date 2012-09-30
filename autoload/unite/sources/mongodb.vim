@@ -4,7 +4,9 @@ set cpo&vim
 
 " define unite source
 function! unite#sources#mongodb#define()
-  return [s:db_source, s:col_source, s:doc_source]
+  return executable('mongo') && unite#util#has_vimproc() 
+              \ ? [s:db_source, s:col_source, s:doc_source]
+              \ : []
 endfunction
 
 " source object
