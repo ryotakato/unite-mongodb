@@ -2,6 +2,10 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+
+let s:pre_db = ""
+let s:pre_col = ""
+
 " define unite source
 function! unite#sources#mongodb#define()
   return executable('mongo') && unite#util#has_vimproc() 
@@ -17,14 +21,27 @@ let s:source = {
 
 " main process of mongodb
 function! s:source.gather_candidates(args, context) "{{{
-  let a_count = len(a:args)
+  let a_cnt = len(a:args)
 
-  if (a_count == 0) 
-    return s:db_list()
-  elseif (a_count == 1)
-    return s:col_list(a:args[0])
+  " check input & pre-select
+  if (a_cnt == 0) 
+    let select_db = s:pre_db
+    let select_col = s:pre_col
+  elseif (a_cnt == 1)
+    let select_db = a:args[0]
+    let select_col = s:pre_col
   else
-    return s:doc_list(a:args[0], a:args[1])
+    let select_db = a:args[0]
+    let select_col = a:args[1]
+  end
+
+  " call each list
+  if select_db == "" && select_col == ""
+    return s:db_list()
+  elseif select_col == ""
+    return s:col_list(select_db)
+  else
+    return s:doc_list(select_db, select_col)
   end
 
 endfunction "}}}
@@ -50,6 +67,10 @@ function! s:db_list() "{{{
           \ })
     unlet db
   endfor
+
+  " reset pre-select db, col
+  let s:pre_db = ""
+  let s:pre_col = ""
 
   return candidates
 
@@ -79,6 +100,11 @@ function! s:col_list(db_name) "{{{
           \ })
     unlet col
   endfor
+
+  " set db_name as pre-select
+  let s:pre_db = a:db_name
+  " reset pre-select col
+  let s:pre_col = ""
 
   return candidates
 
@@ -111,6 +137,10 @@ function! s:doc_list(db_name, col_name) "{{{
     unlet doc
   endfor
 
+  " set db_name, col_name as pre-select
+  let s:pre_db = a:db_name
+  let s:pre_col = a:col_name
+  
   return candidates
 
 endfunction "}}}
