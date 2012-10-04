@@ -17,6 +17,7 @@ endfunction
 let s:source = {
       \ 'name' : 'mongodb',
       \ 'description' : 'candidates from MongoDB',
+      \ 'action_table' : {},
       \ }
 
 " main process of mongodb
@@ -152,6 +153,25 @@ function! s:set_prompt(str)
   let unite = unite#get_current_unite()
   let unite.prompt = a:str
 endfunction
+
+let s:mongodb_back_action = {
+      \ 'description' : 'back to upper mongodb',
+      \ }
+
+function! s:mongodb_back_action.func(candidate) "{{{
+  if s:pre_col != "" && s:pre_db != ""
+    let s:pre_col = ""
+  elseif s:pre_db != ""
+    let s:pre_db = ""
+  endif
+
+  call unite#quit_session()
+  call unite#start([[s:source.name]])
+
+endfunction "}}}
+
+call unite#custom_action('source/mongodb/*', 'back', s:mongodb_back_action)
+
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
