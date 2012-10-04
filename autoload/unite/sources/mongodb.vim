@@ -83,6 +83,8 @@ function! s:col_list(db_name) "{{{
   " print breadcrumb
   call unite#print_source_message("MongoDB > ".a:db_name." > ", s:source.name)
 
+  call s:set_prompt("MongoDB/".a:db_name."/")
+
   " get cols as string by vimproc,mongo shell
   let cols_line = vimproc#system(
               \ "mongo "
@@ -145,8 +147,11 @@ function! s:doc_list(db_name, col_name) "{{{
 
 endfunction "}}}
 
-
-
+" set to unite current prompt
+function! s:set_prompt(str)
+  let unite = unite#get_current_unite()
+  let unite.prompt = a:str
+endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
