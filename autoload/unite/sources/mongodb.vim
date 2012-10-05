@@ -154,10 +154,12 @@ function! s:set_prompt(str)
   let unite.prompt = a:str
 endfunction
 
+" custom action
 let s:mongodb_back_action = {
       \ 'description' : 'back to upper mongodb',
       \ }
 
+" custom action function
 function! s:mongodb_back_action.func(candidate) "{{{
   if s:pre_col != "" && s:pre_db != ""
     let s:pre_col = ""
@@ -170,8 +172,21 @@ function! s:mongodb_back_action.func(candidate) "{{{
 
 endfunction "}}}
 
+" add to mongodb source
 call unite#custom_action('source/mongodb/*', 'back', s:mongodb_back_action)
 
+
+" add only this keymapping 
+autocmd FileType unite call s:mongodb_keymapping()
+function! s:mongodb_keymapping() "{{{
+  let unite = unite#get_current_unite()
+  for source in unite.sources
+    if source.name ==# s:source.name
+      nnoremap <silent><buffer> <expr> <Plug>(unite_mongodb_back)
+        \ unite#do_action('back')
+    endif
+  endfor
+endfunction "}}}
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
